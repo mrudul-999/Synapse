@@ -1,0 +1,21 @@
+[project]
+name = "synapse"
+version = "0.1.0"
+description = "Multi-agent connected reasoning system"
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph>=0.2.0",
+    "langchain-core>=0.3.0",
+    "langchain-anthropic>=0.2.0", # Or langchain-openai
+    "langchain-mcp-adapters>=0.0.1", # For MCP integration
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "pydantic>=2.9.0",
+    "python-dotenv>=1.0.0",
+    "tavily-python>=0.5.0", # For our first MCP-like search tool
+    "faiss-cpu>=1.8.0",
+    "sentence-transformers>=3.0.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.3.0", "pytest-asyncio>=0.24.0", "ruff>=0.6.0"]
