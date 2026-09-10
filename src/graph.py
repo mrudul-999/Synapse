@@ -2,46 +2,24 @@
 from langgraph.graph import StateGraph, END
 from src.state import SynapseState
 
+from src.agents.llm_agents import (
+    planner_agent,
+    steelman_agent,
+    skeptic_agent,
+    judge_agent,
+    synthesizer_agent
+)
+
 # Placeholder functions (we will implement these in Step 5)
-def planner_node(state: SynapseState):
-    print("[Planner] Breaking down query...")
-    state.current_node = "planner"
-    state.plan = ["1. Search for context", "2. Analyze findings", "3. Draft answer"]
-    return state
 
-def steelman_node(state: SynapseState):
-    print("[Steelman] Building the strongest possible argument for the draft...")
-    state.current_node = "steelman"
-    state.steelman_argument = "The draft is correct because..."
-    return state
-
-def skeptic_node(state: SynapseState):
-    print("[Skeptic] Finding flaws, edge cases, and missing citations...")
-    state.current_node = "skeptic"
-    state.skeptic_argument = "However, it fails to consider..."
-    return state
-
-def judge_node(state: SynapseState):
-    print("[Judge] Evaluating the debate...")
-    state.current_node = "judge"
-    # Simple mock logic for now: allow 1 revision max
-    if state.revision_count < 1:
-        state.needs_revision = True
-        state.revision_count += 1
-        state.judge_verdict = "REVISE: Skeptic raised valid points about missing sources."
-    else:
-        state.needs_revision = False
-        state.judge_verdict = "APPROVED: Arguments are balanced and verified."
-    return state
-
-def synthesizer_node(state: SynapseState):
-    print("[Synthesizer] Generating final verified answer...")
-    state.current_node = "synthesizer"
-    state.final_answer = "Based on the verified debate, here is the answer..."
-    return state
 
 def should_revise(state: SynapseState) -> str:
-    if state.needs_revision:
+    """Determine if we should revise or synthesize based on judge verdict"""
+    # Hard limit to prevent infinite debate loops!
+    if state.revision_count >= 2:
+        return "synthesize"
+        
+    if state.needs_revision == True:
         return "revise"
     return "synthesize"
 
@@ -49,11 +27,11 @@ def should_revise(state: SynapseState) -> str:
 builder = StateGraph(SynapseState)
 
 # Add nodes
-builder.add_node("planner", planner_node)
-builder.add_node("steelman", steelman_node)
-builder.add_node("skeptic", skeptic_node)
-builder.add_node("judge", judge_node)
-builder.add_node("synthesizer", synthesizer_node)
+builder.add_node("planner", planner_agent)
+builder.add_node("steelman", steelman_agent)
+builder.add_node("skeptic", skeptic_agent)
+builder.add_node("judge", judge_agent)
+builder.add_node("synthesizer", synthesizer_agent)
 
 # Define the flow
 builder.set_entry_point("planner")

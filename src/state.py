@@ -4,6 +4,9 @@ from typing import List, Dict, Any, Optional
 from langgraph.graph import add_messages
 from typing_extensions import Annotated
 
+
+
+#page
 class AgentMessage(BaseModel):
     role: str
     content: str
@@ -14,7 +17,7 @@ class SynapseState(BaseModel):
     query: str
     
     # The hierarchical plan (starts simple, can be upgraded to a tree later)
-    plan: List[str] = Field(default_factory=list)
+    plan: List[str] = Field(default_factory=list) #ok
     current_step_index: int = 0
     
     # Messages history (using LangGraph's add_messages reducer for thread safety)
