@@ -49,3 +49,34 @@ By saying `await llm.ainvoke(...)`, you are telling Python: *"Hey, I'm waiting f
 **A:** This happens when there is a mismatch between how your state is defined and how your agents try to read it.
 - If your graph is built using `builder = StateGraph(dict)`, LangGraph passes a standard Python dictionary to your agents. You read it using **bracket notation** (e.g., `state['query']`). But if you don't define reducers for that dict, LangGraph's default behavior is to completely overwrite the entire state with whatever the node returns, which wipes out the original `query` (causing a `KeyError` on the next step)!
 - To prevent this, we built a structured Pydantic model (`SynapseState`). If your graph uses `builder = StateGraph(SynapseState)`, LangGraph passes that actual Pydantic object to the agents. You must read it using **dot notation** (e.g., `state.query`). If your code still tries to do `state['query']`, it will crash with a `TypeError` because an object is not a dictionary!
+
+### Q10: Why do we use an `async for` loop when looping through the graph's output (e.g., `async for state_update in graph.astream(...)`)?
+**A:** When we call `graph.astream(...)`, LangGraph runs our graph asynchronously. This means the graph will pause (await) whenever it hits a slow operation inside an agent (like waiting for the LLM to reply). 
+
+Because the graph is running asynchronously and yielding results one node at a time, it returns an **Asynchronous Generator**. Standard Python `for` loops don't know how to "wait" for the next item to be ready. 
+
+By using `async for`, we tell Python: *"Start looping through the graph's updates. Every time you ask for the next update, it might take a few seconds (while the agent thinks). Go do other things in the background, and pause this loop until the next state update is actually ready."* This is essential for streaming real-time progress to a user interface without freezing the server!
+
+### Q11: What is the difference between synchronous and asynchronous? If 10 people use 10 different logins on a synchronous server, will it still freeze?
+**A:** Yes, the freezing problem would still persist on a purely synchronous, single-threaded server, regardless of how many different logins are used!
+
+Here is a simple analogy:
+
+**Synchronous (Sequential / Blocking)**
+Imagine a chef in a restaurant cooking a burger.
+1. The chef puts the meat on the grill.
+2. The chef **stands there and stares at the meat for 5 minutes** until it's cooked.
+3. Then, the chef toasts the buns and serves the burger.
+
+If 10 customers walk in, Customer #2 cannot even get their order started until Customer #1 is completely finished. The server is "frozen" waiting for the grill.
+
+**Asynchronous (Concurrent / Non-Blocking)**
+Now imagine a better chef.
+1. The chef puts the meat on the grill.
+2. Instead of staring at the meat, the chef **sets a timer** and immediately starts taking orders and prepping ingredients for Customers #2 through #10.
+3. When the timer goes off, the chef goes back to flip the burger.
+
+**Why this matters for your application:**
+When you ask an LLM to generate text, the computer has to send a request over the internet and wait. This is "Network I/O". 
+- In a **synchronous** Python server, if User 1 asks a question, the server stops completely to wait for the LLM. Users 2 through 10 will just see a loading spinner. The server won't even acknowledge them until User 1 is done. *(Note: Traditional synchronous servers solve this by spinning up completely separate CPU processes or threads for every user, but this consumes a massive amount of RAM and CPU).*
+- In an **asynchronous** Python server (like FastAPI), Python sets a "timer" using the `await` keyword. It sends User 1's request to the LLM, immediately parks that task, and is instantly free to accept the requests from Users 2 through 10. A single process can handle thousands of users concurrently this way!

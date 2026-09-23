@@ -3,8 +3,8 @@ import asyncio
 from dotenv import load_dotenv
 load_dotenv()
 
-from src.graph import synapse_graph
-from src.state import SynapseState
+from src.graph import graph
+from src.state import state
 
 async def main():
     initial_state = {
@@ -26,7 +26,7 @@ async def main():
     
     final_state = {}
     # LangGraph yields the state as a dictionary during streaming
-    async for state_update in synapse_graph.astream(initial_state, stream_mode="values"):
+    async for state_update in graph.astream(initial_state, stream_mode="values"):
         final_state = state_update
         node_name = final_state.get('current_node','unknown')
         print(f"✅ Node executed: {node_name.upper()}")
