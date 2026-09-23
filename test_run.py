@@ -3,9 +3,20 @@ import asyncio
 from dotenv import load_dotenv
 load_dotenv()
 
-from src.graph import graph
-from src.state import state
+from src.graph import synapse_graph
+from tavily import TavilyClient
+import os
 
+tavily_client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
+
+response = tavily_client.search("Who is Leo Messi?")
+
+print(response)
+
+
+
+
+    
 async def main():
     initial_state = {
     "query": "Who do you think is hotter conventionally? Sydney Sweeney or Ana De Armas",
@@ -24,22 +35,23 @@ async def main():
     
     print("Hey I am starting Synapse Multi-Agent Debate...\n")
     
+    
     final_state = {}
-    # LangGraph yields the state as a dictionary during streaming
-    async for state_update in graph.astream(initial_state, stream_mode="values"):
-        final_state = state_update
-        node_name = final_state.get('current_node','unknown')
-        print(f"✅ Node executed: {node_name.upper()}")
+    # # LangGraph yields the state as a dictionary during streaming
+    # async for state_update in graph.astream(initial_state, stream_mode="values"):
+    #     final_state = state_update
+    #     node_name = final_state.get('current_node','unknown')
+    #     print(f"✅ Node executed: {node_name.upper()}")
         
-        # Print verdict only when the judge node finishes
-        if final_state.get('judge_verdict') and node_name == "judge":
-            verdict = final_state.get('judge_verdict')
-            if "VERDICT:" in verdict:
-                verdict_line = [line for line in verdict.split('\n') if 'VERDICT:' in line][0]
-                print(f"   → {verdict_line}")
+    #     # Print verdict only when the judge node finishes
+    #     if final_state.get('judge_verdict') and node_name == "judge":
+    #         verdict = final_state.get('judge_verdict')
+    #         if "VERDICT:" in verdict:
+    #             verdict_line = [line for line in verdict.split('\n') if 'VERDICT:' in line][0]
+    #             print(f"   → {verdict_line}")
                 
-    print("\n🎯 Final Answer:")
-    print(final_state.get('final_answer',"No answer generated"))
+    # print("\n🎯 Final Answer:")
+    # print(final_state.get('final_answer',"No answer generated"))
 
 if __name__ == "__main__":
     asyncio.run(main())

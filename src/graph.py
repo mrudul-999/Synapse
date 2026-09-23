@@ -1,8 +1,8 @@
 # src/graph.py
 from langgraph.graph import StateGraph, END
-from src.state import SynapseState
+from .state import SynapseState
 
-from src.agents.llm_agents import (
+from .agents.llm_agents import (
     planner_agent,
     steelman_agent,
     skeptic_agent,

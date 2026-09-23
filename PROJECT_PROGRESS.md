@@ -21,7 +21,12 @@ This document tracks the current state of the project, including completed steps
 
 - **Step 5: Quick Local Test (`test_run.py`)**
   - Created a temporary script in the root to verify the LangGraph engine runs and routes state properly before building the FastAPI wrapper or MCP tools.
+  - Implemented actual LLM calls using local Ollama (`ChatOllama`) in `src/agents/llm_agents.py` to drive the debate loop with real generated content.
 
 ## 🚧 Current / Next Steps
 
-- *Ready for the next phase of development!*
+- **Step 6: Add one MCP server and one tool call**
+  - Build a trivial MCP server first (e.g. web search via Tavily).
+  - Test it standalone with the MCP inspector or a tiny script.
+  - Wire it into the tool-executor node via `langchain-mcp-adapters`.
+  - *Note: Don't build all three MCP servers (web search, code exec, vector DB) at once to keep debugging isolated and simpler.*

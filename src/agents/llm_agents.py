@@ -2,7 +2,7 @@
 import os
 from typing import Dict, Any
 from langchain_ollama import ChatOllama
-from src.state import SynapseState
+from ..state import SynapseState
 
 def extract_text(response) -> str:
     if isinstance(response.content, list):
@@ -15,7 +15,7 @@ llm = ChatOllama(
     temperature=0.7,
 )
 
-async def planner_agent(state: SynapseStatze) -> Dict[str, Any]:
+async def planner_agent(state: SynapseState) -> Dict[str, Any]:
     """Breaks down the query into a step-by-step plan"""
     query = state.query
     revision_count = state.revision_count
