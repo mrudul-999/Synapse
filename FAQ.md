@@ -80,3 +80,18 @@ Now imagine a better chef.
 When you ask an LLM to generate text, the computer has to send a request over the internet and wait. This is "Network I/O". 
 - In a **synchronous** Python server, if User 1 asks a question, the server stops completely to wait for the LLM. Users 2 through 10 will just see a loading spinner. The server won't even acknowledge them until User 1 is done. *(Note: Traditional synchronous servers solve this by spinning up completely separate CPU processes or threads for every user, but this consumes a massive amount of RAM and CPU).*
 - In an **asynchronous** Python server (like FastAPI), Python sets a "timer" using the `await` keyword. It sends User 1's request to the LLM, immediately parks that task, and is instantly free to accept the requests from Users 2 through 10. A single process can handle thousands of users concurrently this way!
+
+### Q12: Why does my IDE show "Cannot find module `src.state`" but my code still runs, and how do I fix it?
+**A:** This happens because language servers (like Pyright/Pylance) automatically infer a directory named `src/` as the import root. Because Pyright considers `src/` as the root, it expects you to import using `from state import ...`. However, at runtime when you run a script from your project's top-level directory, Python considers the top-level directory as the root, which requires `from src.state import ...`.
+
+**The Fix:** Use standard **relative imports** inside your `src/` directory. By changing absolute imports (e.g., `from src.state import SynapseState`) to relative imports (e.g., `from .state import SynapseState`), you make the import robust and perfectly satisfy both the IDE and the Python runtime.
+
+### Q13: What is Tavily (talivy) and how is it used here?
+**A:** Tavily (`tavily-python`) is a specialized search engine API built specifically for AI agents and LLMs (Large Language Models). 
+
+Unlike standard search APIs like Google or Bing which are meant for humans, Tavily is designed to:
+1. **Search the web in real-time** for accurate and up-to-date information.
+2. **Pre-process and summarize** the data so it's optimized for an AI to read and understand quickly without having to scrape and parse messy HTML websites itself.
+3. Be easily integrated into agent frameworks like LangChain or LangGraph to give your agents "internet access".
+
+In Synapse, you can plug this Tavily tool into your `planner` or `steelman` agents so they can fetch real web data to support their arguments and research!

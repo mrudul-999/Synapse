@@ -4,19 +4,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from src.graph import synapse_graph
-from tavily import TavilyClient
-import os
 
-tavily_client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
+from src.tools.web_search_server import web_search
 
-response = tavily_client.search("Who is Leo Messi?")
+# Call web_search directly to test it
 
-print(response)
+print(web_search("Who is Mrudul Nagrale?"))
 
 
 
-
-    
 async def main():
     initial_state = {
     "query": "Who do you think is hotter conventionally? Sydney Sweeney or Ana De Armas",
